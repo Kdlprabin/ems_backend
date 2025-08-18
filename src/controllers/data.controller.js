@@ -2,6 +2,7 @@ const XLSX = require("xlsx");
 const fs = require("fs");
 const path = require("path");
 const DataModel = require("../models/data.model");
+const Staff = require("../models/staff.model")
 
 /**
  * Handles Excel file upload and returns JSON.
@@ -13,6 +14,15 @@ const DataModel = require("../models/data.model");
 async function saveExcelDataToMongo(dataArray) {
   try {
     const inserted = await DataModel.insertMany(dataArray);
+    console.log(`Inserted ${inserted.length} records successfully.`);
+  } catch (err) {
+    console.error("Error inserting data:", err);
+  }
+}
+
+async function saveStaffExcelDataToMongo(dataArray) {
+  try {
+    const inserted = await Staff.insertMany(dataArray);
     console.log(`Inserted ${inserted.length} records successfully.`);
   } catch (err) {
     console.error("Error inserting data:", err);
@@ -67,8 +77,10 @@ const uploadStaffExcelData = async (req, res) => {
     // Convert sheet to JSON
     const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: null });
 
+    console.log(jsonData[0]);
+
     // Save data to MongoDB
-    await saveExcelDataToMongo(jsonData);
+    await saveStaffExcelDataToMongo(jsonData);
 
     // Delete uploaded file after processing
     fs.unlinkSync(filePath);

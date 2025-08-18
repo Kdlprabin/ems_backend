@@ -6,7 +6,7 @@ const register = async (req, res) => {};
 
 const getStaffData = async (req, res) => {
   try {
-    const data = await Staff.find().sort({ _id: -1 });
+    const data = await Staff.distinct("Staff Name");
     return res.status(200).json(data);
   } catch (err) {
     console.error(err);
