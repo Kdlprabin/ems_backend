@@ -51,6 +51,38 @@ const uploadExcelController = async (req, res) => {
   }
 };
 
+const uploadStaffExcelData = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const filePath = path.resolve(req.file.path);
+
+    // Read the Excel file
+    const workbook = XLSX.readFile(filePath);
+    const sheetName = workbook.SheetNames[0]; // Use the first sheet
+    const worksheet = workbook.Sheets[sheetName];
+
+    // Convert sheet to JSON
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: null });
+
+    // Save data to MongoDB
+    await saveExcelDataToMongo(jsonData);
+
+    // Delete uploaded file after processing
+    fs.unlinkSync(filePath);
+
+    //save data to mongodb
+    return res
+      .status(200)
+      .json({ message: "File processed successfully", data: jsonData });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to process Excel file" });
+  }
+};
+
 const getDataController = async (req, res) => {
   try {
     const data = await DataModel.find().sort({ _id: -1 });
@@ -61,4 +93,4 @@ const getDataController = async (req, res) => {
     }
 }
 
-module.exports = {uploadExcelController, getDataController};
+module.exports = {uploadExcelController, getDataController, uploadStaffExcelData};
