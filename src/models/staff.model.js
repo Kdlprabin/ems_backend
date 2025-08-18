@@ -23,7 +23,7 @@ const staffSchema = mongoose.Schema({
         type: String,
         required: true,
     },
-    jobs: {
+    job_type: {
         type: String,
         required: true,
     },

@@ -12,11 +12,6 @@ const branchSchema = mongoose.Schema({
         required: true,
         unique: true,
     },
-    branch_code: {
-        type: String,
-        required: true,
-        unique: true,
-    },
     branch_manager: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Staff',
