@@ -29,8 +29,8 @@ const getStaffNames = async (req, res) => {
 
 const getStaffNamesByBranch = async(req, res) => {
   try{
-     const { branchName } = req.query
-     
+     const { branchName } = req.params
+
     const data = await Staff.distinct("Staff Name", { "Branch Name": branchName });
 
     return res.status(200).json(data)
