@@ -3,9 +3,10 @@ const {Router} = require('express');
 const router = Router();
 
 // Importing controllers
-const {getStaffData} = require('../controllers/staff.controller');
+const {getStaffData, getStaffNames} = require('../controllers/staff.controller');
 
 // User routes
 router.get('/data', getStaffData)
+router.get('/staff-name', getStaffNames)
 
 module.exports = router;
