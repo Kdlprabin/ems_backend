@@ -8,6 +8,6 @@ const {getStaffData, getStaffNames, getStaffNamesByBranch} = require('../control
 // User routes
 router.get('/data', getStaffData)
 router.get('/staff-name', getStaffNames)
-router.get('/staff-name/:branchName', getStaffNamesByBranch)
+router.post('/staff-name', getStaffNamesByBranch)
 
 module.exports = router;
