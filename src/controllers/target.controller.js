@@ -31,7 +31,7 @@ function sumMonthsOnly(arrayOfStaffs) {
     ).toFixed(2);
   });
 
-  const grandTotal = Object.values(total).reduce((sum, val) => sum + val, 0);
+  var grandTotal = Object.values(total).reduce((sum, val) => parseFloat(sum) + parseFloat(val), 0);
 
   return {...total, Total : Math.round(grandTotal)};
 }
