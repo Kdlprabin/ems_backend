@@ -6,10 +6,12 @@ const router = Router();
 const staffRoutes = require('./staff.route');
 const dataRoutes = require('./data.route');
 const branchRoutes = require('./branch.route');
+const targetRoutes = require('./target.route')
 
 // Using routes
 router.use('/staff', staffRoutes);
 router.use('/data', dataRoutes);
 router.use('/branch', branchRoutes);
+router.use('/target', targetRoutes);
 
 module.exports = router;
