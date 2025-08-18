@@ -10,7 +10,7 @@ const staffSchema = mongoose.Schema({
   "Staff Code": { type: Number, required: false }, // e.g. 1280
   "Staff Name": { type: String, required: false }, // e.g. Amar Thapa Magar
   "Post": { type: String, required: false }, // e.g. Junior Assistant
-  "Jobstype": { type: String, required: false }, // e.g. Field Staff
+  "JobsType": { type: String, required: false }, // e.g. Field Staff
   "Monitoring": { type: String, required: false }, // e.g. Reshuka Thing
   "Monitoring Post": { type: String, required: false }, // e.g. Branch Manager
   "Indicator": { type: String, required: false }, // e.g. Member / Loanee
