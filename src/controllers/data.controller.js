@@ -105,4 +105,18 @@ const getDataController = async (req, res) => {
     }
 }
 
-module.exports = {uploadExcelController, getDataController, uploadStaffExcelData};
+const deleteData = async (
+  req, res
+) => 
+  {
+    try{
+      const data = await DataModel.deleteMany();
+      return res.status(200).json(data)
+  }
+  catch(err){
+    console.error(err)
+    return res.status(500).json({error: "Failed to fetch data"})
+  }
+}
+
+module.exports = {uploadExcelController, getDataController, uploadStaffExcelData, deleteData};

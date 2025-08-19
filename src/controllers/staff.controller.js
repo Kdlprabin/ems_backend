@@ -43,10 +43,25 @@ const getStaffNamesByBranch = async(req, res) => {
   }
 }
 
+const deleteStaff = async (
+  req, res
+) => 
+  {
+    try{
+      const data = await Staff.deleteMany();
+      return res.status(200).json(data)
+  }
+  catch(err){
+    console.error(err)
+    return res.status(500).json({error: "Failed to fetch data"})
+  }
+}
+
 module.exports = {
   login,
   register,
   getStaffData,
   getStaffNames,
-  getStaffNamesByBranch
+  getStaffNamesByBranch,
+  deleteStaff
 };

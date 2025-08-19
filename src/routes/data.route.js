@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 
 // Importing controllers
-const {uploadExcelController, getDataController, uploadStaffExcelData} = require('../controllers/data.controller');
+const {uploadExcelController, getDataController, uploadStaffExcelData, deleteData} = require('../controllers/data.controller');
 
 const router = express.Router();
 // Set up multer for file uploads
@@ -16,6 +16,8 @@ router.post('/staff-upload', upload.single("file"), uploadStaffExcelData)
 
 // Route to get data from MongoDB
 router.get('/data', getDataController);
+
+router.delete('/delete', deleteData);
 
 // Route to handle Excel file upload and return JSON
 module.exports = router;
