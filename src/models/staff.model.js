@@ -24,6 +24,8 @@ const staffSchema = mongoose.Schema({
   "कामको प्रकार": { type: String, required: false }, // e.g. शाखा प्रमुख
 });
 
+staffSchema.index({ "Staff Code": 1, Indicator: 1 }, { unique: true });
+
 const Staff = mongoose.model('Staff', staffSchema);
 
 module.exports = Staff;
