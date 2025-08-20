@@ -6,6 +6,10 @@ const achievementSchema = mongoose.Schema({
     required: true,
     auto: true,
   },
+  "Branch" : {
+    type: String,
+    required: true,
+  },
   "Staff Code": {
     type: String,
     required: true,
