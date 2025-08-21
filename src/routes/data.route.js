@@ -8,6 +8,7 @@ const {
   uploadStaffExcelData,
   deleteData,
   uploadAchieveExcelData,
+  getReportController
 } = require("../controllers/data.controller");
 
 const router = express.Router();
@@ -25,6 +26,9 @@ router.post("/achieve-upload", upload.single("file"), uploadAchieveExcelData);
 
 // Route to get data from MongoDB
 router.get("/data", getDataController);
+
+// Route to get report Data 
+router.get("/report-data", getReportController)
 
 router.delete("/delete", deleteData);
 

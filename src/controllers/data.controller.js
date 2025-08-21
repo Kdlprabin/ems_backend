@@ -4,14 +4,13 @@ const path = require("path");
 const DataModel = require("../models/data.model");
 const Staff = require("../models/staff.model");
 const Achievement = require("../models/achievement.model");
-const Target = require("../models/target.model")
+const Target = require("../models/target.model");
 
 /**
  * Handles Excel file upload and returns JSON.
  * @param {Request} req - Express request object
  * @param {Response} res - Express response object
  */
-
 
 // Split quarterly → months
 function expandQuarterData(branch, isFieldStaff) {
@@ -43,9 +42,8 @@ function expandQuarterData(branch, isFieldStaff) {
   return {}; // Branch Manager handled separately
 }
 
-
-async function saveTargetToMongoDB(dataArray){
-  try{
+async function saveTargetToMongoDB(dataArray) {
+  try {
     const staffList = await Staff.find();
     const branchList = dataArray;
 
@@ -55,7 +53,8 @@ async function saveTargetToMongoDB(dataArray){
     staffList.forEach((staff) => {
       if (staff.JobsType === "Field Staff") {
         const branch = branchList.find(
-          (b) => b.Branch === staff["Branch Name"] && b.Category === staff.Indicator
+          (b) =>
+            b.Branch === staff["Branch Name"] && b.Category === staff.Indicator
         );
 
         const monthData = expandQuarterData(branch, true);
@@ -63,11 +62,19 @@ async function saveTargetToMongoDB(dataArray){
         const key = `${staff["Branch Name"]}-${staff.Indicator}`;
         if (!branchFieldTotals[key]) {
           branchFieldTotals[key] = {
-            Shrawan: 0, Bhadra: 0, Aswoj: 0,
-            Kartik: 0, Mangsir: 0, Poush: 0,
-            Magh: 0, Falgun: 0, Chaitra: 0,
-            Baishak: 0, Jestha: 0, Ashar: 0,
-            Total: 0
+            Shrawan: 0,
+            Bhadra: 0,
+            Aswoj: 0,
+            Kartik: 0,
+            Mangsir: 0,
+            Poush: 0,
+            Magh: 0,
+            Falgun: 0,
+            Chaitra: 0,
+            Baishak: 0,
+            Jestha: 0,
+            Ashar: 0,
+            Total: 0,
           };
         }
 
@@ -81,7 +88,8 @@ async function saveTargetToMongoDB(dataArray){
     // Now build final response
     const result = staffList.map((staff) => {
       const branch = branchList.find(
-        (b) => b.Branch === staff["Branch Name"] && b.Category === staff.Indicator
+        (b) =>
+          b.Branch === staff["Branch Name"] && b.Category === staff.Indicator
       );
 
       let monthData = {};
@@ -97,15 +105,15 @@ async function saveTargetToMongoDB(dataArray){
         "Branch Name": staff["Branch Name"],
         "Staff Code": staff["Staff Code"],
         "Staff Name": staff["Staff Name"],
-        "JobsType": staff["JobsType"],
-        "Indicator": staff["Indicator"],
+        JobsType: staff["JobsType"],
+        Indicator: staff["Indicator"],
         ...monthData,
       };
     });
 
-    const inserted = await Target.insertMany(result);
-  }
-  catch(err){
+    await Target.insertMany(result);
+
+  } catch (err) {
     console.log("Error inserting data :", err);
   }
 }
@@ -260,10 +268,70 @@ const deleteData = async (req, res) => {
   }
 };
 
+const getReportController = async (req, res) => {
+  try {
+   const achievements = await Achievement.find({});
+    const targets = await Target.find({});
+
+    const months = [
+      "Shrawan", "Bhadra", "Aswoj", "Kartik", "Mangsir", "Poush",
+      "Magh", "Falgun", "Chaitra", "Baishak", "Jestha", "Ashar"
+    ];
+
+    // Create a map for faster target lookup
+    const targetMap = new Map();
+    targets.forEach(t => {
+      const key = `${t["Staff Code"]}_${t.Indicator}`;
+      targetMap.set(key, t);
+    });
+
+    const result = achievements.map((ach, index) => {
+      const key = `${ach["Staff Code"]}_${ach.Indicator}`;
+      const target = targetMap.get(key);
+
+      // Calculate data for all months dynamically
+
+      const monthlyData = months.map((month) => {
+        const achieve = ach[month] || 0;
+        const targetValue = target ? target[month] || 0 : 0;
+        const achievePercent = targetValue !== 0 ? (achieve / targetValue) * 100 : 0;
+        const fullMarks = achievePercent / 10;
+        const resultStatus = achievePercent >= 80 ? "Pass" : "Fail";
+
+        return {
+          month,
+          target: targetValue,
+          achieve,
+          achievePercent: parseFloat(achievePercent.toFixed(2)),
+          fullMarks: parseFloat(fullMarks.toFixed(2)),
+          result: resultStatus
+        };
+      });
+
+      return {
+        sn: index + 1,
+        "Staff Code": ach["Staff Code"],
+        "Staff Name": ach["Staff Name"],
+        "Branch Name": ach["Branch"],
+        Post: ach["Job Type"],
+        JobsType: ach["Job Type"],
+        Indicator: ach.Indicator,
+        monthly: monthlyData // <-- Now each staff has complete monthly data
+      };
+    });
+
+    res.json(result);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: "Failed to fetch data" });
+  }
+};
+
 module.exports = {
   uploadExcelController,
   getDataController,
   uploadStaffExcelData,
   uploadAchieveExcelData,
   deleteData,
+  getReportController,
 };
