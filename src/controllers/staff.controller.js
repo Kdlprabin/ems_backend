@@ -1,6 +1,17 @@
 const Staff = require("../models/staff.model.js");
 
-const login = async (req, res) => {};
+const login = async (req, res) => {
+  const default_username = "RKlohoni";
+  const default_password = "12345";
+
+  const {password, username} = req.body; 
+
+  if(username === default_username && password === default_password){
+    res.status(200).json({message: "login success", isLoggedIn: true})
+  }
+
+  res.status(401).json({message: "Invalid Credentials", isLoggedIn: false})
+};
 
 const register = async (req, res) => {};
 
