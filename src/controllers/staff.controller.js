@@ -1,7 +1,7 @@
 const Staff = require("../models/staff.model.js");
 
 const login = async (req, res) => {
-  const default_username = "RKlohoni";
+  const default_username = "RClohani";
   const default_password = "12345";
 
   const {password, username} = req.body; 
