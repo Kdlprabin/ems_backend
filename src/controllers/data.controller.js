@@ -112,7 +112,6 @@ async function saveTargetToMongoDB(dataArray) {
     });
 
     await Target.insertMany(result);
-
   } catch (err) {
     console.log("Error inserting data :", err);
   }
@@ -248,6 +247,11 @@ const uploadAchieveExcelData = async (req, res) => {
   }
 };
 
+const getFullMarksByStaffCode = (data, staffCode) => {
+  const staff = data.find((item) => item["Staff Code"] === staffCode);
+  return staff ? staff["Full Marks"] : null;
+};
+
 const getDataController = async (req, res) => {
   try {
     const data = await DataModel.find().sort({ _id: -1 });
@@ -270,32 +274,44 @@ const deleteData = async (req, res) => {
 
 const getReportController = async (req, res) => {
   try {
-   const achievements = await Achievement.find({});
+    const achievements = await Achievement.find({});
     const targets = await Target.find({});
+    const staffData = await Staff.find({});
 
     const months = [
       "Shrawan", "Bhadra", "Aswoj", "Kartik", "Mangsir", "Poush",
       "Magh", "Falgun", "Chaitra", "Baishak", "Jestha", "Ashar"
     ];
 
-    // Create a map for faster target lookup
+    // Create a map for targets
     const targetMap = new Map();
-    targets.forEach(t => {
+    targets.forEach((t) => {
       const key = `${t["Staff Code"]}_${t.Indicator}`;
       targetMap.set(key, t);
     });
 
+    // Create a map for Full Marks
+    const fullMarksMap = new Map();
+    staffData.forEach((staff) => {
+      fullMarksMap.set(
+        `${staff["Staff Code"]}_${staff.Indicator}`, 
+        staff["Full Marks"] || 0
+      );
+    });
+
     const result = achievements.map((ach, index) => {
-      const key = `${ach["Staff Code"]}_${ach.Indicator}`;
-      const target = targetMap.get(key);
+      const targetKey = `${ach["Staff Code"]}_${ach.Indicator}`;
+      const target = targetMap.get(targetKey);
 
-      // Calculate data for all months dynamically
+      // Fetch Full Marks using both Staff Code + Indicator
+      const fullMarks = fullMarksMap.get(targetKey) || 0;
 
+      // Generate monthly data
       const monthlyData = months.map((month) => {
         const achieve = ach[month] || 0;
         const targetValue = target ? target[month] || 0 : 0;
-        const achievePercent = targetValue !== 0 ? (achieve / targetValue) * 100 : 0;
-        const fullMarks = achievePercent / 10;
+        const achievePercent =
+          targetValue !== 0 ? (achieve / targetValue) * 100 : 0;
         const resultStatus = achievePercent >= 80 ? "Pass" : "Fail";
 
         return {
@@ -303,8 +319,8 @@ const getReportController = async (req, res) => {
           target: targetValue,
           achieve,
           achievePercent: parseFloat(achievePercent.toFixed(2)),
-          fullMarks: parseFloat(fullMarks.toFixed(2)),
-          result: resultStatus
+          fullMarks,
+          result: resultStatus,
         };
       });
 
@@ -316,7 +332,7 @@ const getReportController = async (req, res) => {
         Post: ach["Job Type"],
         JobsType: ach["Job Type"],
         Indicator: ach.Indicator,
-        monthly: monthlyData // <-- Now each staff has complete monthly data
+        monthly: monthlyData,
       };
     });
 
@@ -326,6 +342,7 @@ const getReportController = async (req, res) => {
     return res.status(500).json({ error: "Failed to fetch data" });
   }
 };
+
 
 module.exports = {
   uploadExcelController,
